@@ -12,6 +12,7 @@ export default function Login() {
   const handleLoginSubmit = (formData: { token: string; id: number }) => {
     sessionStorage.setItem("secretToken", formData.token);
     sessionStorage.setItem("id", formData.id.toString());
+    router.push("/perfil");
   };
 
   useEffect(() => {
