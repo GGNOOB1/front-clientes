@@ -33,7 +33,7 @@ export default function Perfil() {
     } else {
       setIsAuthenticated(true);
 
-      fetch(`${perfil.api_online}/${id}`, {
+      fetch(`${perfil.api_local}/${id}`, {
         headers: {
           Authorization: `Bearer ${currentToken}`,
         },
@@ -73,11 +73,9 @@ export default function Perfil() {
 
               <p>RG: {identify_document}</p>
               <p>Telefone: {phone}</p>
-              <p>Endereço: {address}</p>
               <p>Data de Nascimento: {birthdate}</p>
               <p>Email: {email}</p>
               <p>Genêro: {gender}</p>
-              <p>Status: {status}</p>
             </div>
           </div>
         ) : (

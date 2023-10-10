@@ -24,7 +24,7 @@ export default function IsLogged() {
   return (
     <>
       <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1>Você ja está logado!</h1>
+        <h1>Você está logado!</h1>
         <br />
         <h3>Redirecionando para a página de perfil em {contador} segundos</h3>
       </div>
