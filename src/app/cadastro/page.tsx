@@ -80,13 +80,13 @@ export default function Cadastro() {
     let interval: any;
 
     if (isLoading) {
-      interval = setInterval(updateLoadingText, 500); // Atualize a cada meio segundo
+      interval = setInterval(updateLoadingText, 500);
     } else {
-      setLoadingText("Carregando"); // Reinicie o texto quando não estiver carregando
+      setLoadingText("Carregando");
     }
 
     return () => {
-      clearInterval(interval); // Limpe o intervalo ao desmontar o componente
+      clearInterval(interval);
     };
   }, [isLoading]);
 
@@ -95,7 +95,7 @@ export default function Cadastro() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(apiCadastro.api_local, {
+      const response = await fetch(apiCadastro.api_online, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

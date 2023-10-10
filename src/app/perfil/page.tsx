@@ -10,19 +10,15 @@ import { perfil } from "@/utils/apiUrl";
 export default function Perfil() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [data, setData] = useState<ICustomer[]>([]);
 
-  const [token, setToken] = useState("");
   const [id, setId] = useState();
   const [identify_document, setIdentify_document] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [image_path, setImage_path] = useState("/imgs/perfil/foto.jpg");
-  const [status, setStatus] = useState(0);
 
   useEffect(() => {
     const currentToken = sessionStorage.getItem("secretToken");
@@ -33,7 +29,7 @@ export default function Perfil() {
     } else {
       setIsAuthenticated(true);
 
-      fetch(`${perfil.api_local}/${id}`, {
+      fetch(`${perfil.api_online}/${id}`, {
         headers: {
           Authorization: `Bearer ${currentToken}`,
         },
@@ -45,12 +41,11 @@ export default function Perfil() {
           setIdentify_document(data.data.identify_document);
           setName(data.data.name);
           setPhone(data.data.phone);
-          setAddress(data.data.address);
+
           setBirthdate(data.data.birthdate);
           setEmail(data.data.email);
           setGender(data.data.gender);
           setImage_path(data.data.image_path);
-          setStatus(data.data.status);
         });
     }
   }, [router]);

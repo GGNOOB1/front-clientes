@@ -8,17 +8,14 @@ import IsLogged from "@/components/isLogged";
 export default function Login() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const router = useRouter();
   const handleLoginSubmit = (formData: { token: string; id: number }) => {
     sessionStorage.setItem("secretToken", formData.token);
     sessionStorage.setItem("id", formData.id.toString());
-    // router.push("/perfil");
     setIsAuthenticated(true);
   };
 
   useEffect(() => {
     if (sessionStorage.getItem("secretToken")) {
-      // router.push("/perfil");
       setIsAuthenticated(true);
     }
   }, []);

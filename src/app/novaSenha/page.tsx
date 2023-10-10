@@ -22,7 +22,7 @@ export default function NovaSenha() {
     }
     async function fetchData() {
       try {
-        const response = await fetch(verificarTokenRecuperarSenha.api_local, {
+        const response = await fetch(verificarTokenRecuperarSenha.api_online, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -55,7 +55,7 @@ export default function FormNovaSenha(props: any) {
     e.preventDefault();
 
     try {
-      const response = await fetch(atualizarSenha.api_local, {
+      const response = await fetch(atualizarSenha.api_online, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
