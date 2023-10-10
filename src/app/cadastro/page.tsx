@@ -1,23 +1,30 @@
 "use client";
 
+import { InputMask } from "@react-input/mask";
+import "./page.css";
 import { apiCadastro } from "@/utils/apiUrl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Cadastro() {
   const router = useRouter();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("Carregando");
 
   const [identify_document, setIdentify_document] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
   const [status, setStatus] = useState(0);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [cep, setCep] = useState("");
+  const [number, setNumber] = useState("");
+  const [reference, setReference] = useState("");
+  const [complement, setComplement] = useState("");
 
   const setarEmail = (e: any) => {
     setEmail(e.target.value);
@@ -35,27 +42,60 @@ export default function Cadastro() {
   const setarTelefone = (e: any) => {
     setPhone(e.target.value);
   };
-  const setarEndereco = (e: any) => {
-    setAddress(e.target.value);
-  };
   const setarDataNascimento = (e: any) => {
     setBirthdate(e.target.value);
   };
   const setarGenero = (e: any) => {
     setGender(e.target.value);
   };
-  const setarStatus = (e: any) => {
-    setStatus(parseInt(e.target.value));
-  };
   const setarConfirmSenha = (e: any) => {
     setConfirmPassword(e.target.value);
   };
 
+  const setarCep = (e: any) => {
+    const valorDigitado = e.target.value;
+    setCep(valorDigitado);
+  };
+  const setarNum = (e: any) => {
+    setNumber(e.target.value);
+  };
+  const setarComplemento = (e: any) => {
+    setComplement(e.target.value);
+  };
+  const setarReferencia = (e: any) => {
+    setReference(e.target.value);
+  };
+
+  const updateLoadingText = () => {
+    setLoadingText((prevText) => {
+      if (prevText === "Carregando...") {
+        return "Carregando";
+      } else {
+        return prevText + ".";
+      }
+    });
+  };
+
+  useEffect(() => {
+    let interval: any;
+
+    if (isLoading) {
+      interval = setInterval(updateLoadingText, 500); // Atualize a cada meio segundo
+    } else {
+      setLoadingText("Carregando"); // Reinicie o texto quando não estiver carregando
+    }
+
+    return () => {
+      clearInterval(interval); // Limpe o intervalo ao desmontar o componente
+    };
+  }, [isLoading]);
+
   const envioForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const response = await fetch(apiCadastro.api_online, {
+      const response = await fetch(apiCadastro.api_local, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,29 +108,32 @@ export default function Cadastro() {
           name,
           phone,
           identify_document,
-          address,
           birthdate,
           gender,
           status,
+          cep,
+          number,
+          complement,
+          reference,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Cadastro bem sucedido!", data);
+        Swal.fire("Cadastrado com sucesso!", data.message, "success");
         router.push("/login");
       } else {
         if (response.status === 400) {
           const errorData = await response.json();
           console.log(errorData);
+          const message = errorData.erro || "Confirme suas informações";
+          Swal.fire("Falha ao cadastrar!", message, "error");
         }
       }
     } catch (error) {
-      console.log("Erro ao enviar solicitação de cadastro", error);
+      console.error("Erro ao enviar solicitação de cadastro", error);
     } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 3000);
+      setIsLoading(false);
     }
   };
 
@@ -98,15 +141,16 @@ export default function Cadastro() {
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 textoCrie">
             Crie sua conta
           </h2>
         </div>
 
-        <div className="mt-10 md:mx-auto sm:w-full sm:max-w-x1 divForm">
+        <div className="mt-10 md:mx-auto sm:w-full sm:max-w-x1 divForm1">
           <form className="space-y-6" onSubmit={envioForm}>
+            <h1 className="infoPessoal">Informações pessoais</h1>
             <div className="flex">
-              <div className="w-1/2 mr-4">
+              <div className="w-1/2 mr-20">
                 <div className="mb-4">
                   <label
                     htmlFor="name"
@@ -203,170 +247,157 @@ export default function Cadastro() {
                     </select>
                   </div>
                 </div>
-
-                <div className="mb-4">
-                  <label
-                    htmlFor="status"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Status
-                  </label>
-                  <div className="mt-2">
-                    <select required onChange={setarStatus}>
-                      <option>Escolha um status: </option>
-                      <option value={"1"}>Ativo</option>
-                      <option value={"0"}>Desativado</option>
-                    </select>
-                  </div>
-                </div>
+                <br />
+                <br />
+                <br />
               </div>
               <div className="w-1/2">
                 <div className="mb-4">
                   <label
-                    htmlFor="address"
+                    htmlFor="cep"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
-                    Endereço
+                    Cep
                   </label>
                   <div className="mt-2">
                     <input
-                      id="address"
-                      name="address"
+                      id="cep"
+                      name="cep"
                       type="text"
-                      autoComplete="address"
+                      autoComplete="cep"
                       required
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      onChange={setarEndereco}
+                      onChange={setarCep}
                     />
                   </div>
                 </div>
-
-                {/* <div className="mb-4">
+                <div className="mb-4">
                   <label
-                    htmlFor="city"
+                    htmlFor="number"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
-                    Cidade
+                    Número da casa/apto
                   </label>
                   <div className="mt-2">
                     <input
-                      id="city"
-                      name="city"
+                      id="number"
+                      name="number"
                       type="text"
-                      autoComplete="city"
+                      autoComplete="number"
                       required
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                      onChange={setarNum}
                     />
                   </div>
                 </div>
-
-                <div className="">
+                <div className="mb-4">
                   <label
-                    htmlFor="state"
+                    htmlFor="complement"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
-                    Estado
-                  </label>
-                  <div className="mt-2">
-                    <select>
-                      <option>Escolha seu estado</option>
-                      <option value="AC">Acre</option>
-                      <option value="AL">Alagoas</option>
-                      <option value="AP">Amapá</option>
-                      <option value="AM">Amazonas</option>
-                      <option value="BA">Bahia</option>
-                      <option value="CE">Ceará</option>
-                      <option value="DF">Distrito Federal</option>
-                      <option value="ES">Espírito Santo</option>
-                      <option value="GO">Goiás</option>
-                      <option value="MA">Maranhão</option>
-                      <option value="MT">Mato Grosso</option>
-                      <option value="MS">Mato Grosso do Sul</option>
-                      <option value="MG">Minas Gerais</option>
-                      <option value="PA">Pará</option>
-                      <option value="PB">Paraíba</option>
-                      <option value="PR">Paraná</option>
-                      <option value="PE">Pernambuco</option>
-                      <option value="PI">Piauí</option>
-                      <option value="RJ">Rio de Janeiro</option>
-                      <option value="RN">Rio Grande do Norte</option>
-                      <option value="RS">Rio Grande do Sul</option>
-                      <option value="RO">Rondônia</option>
-                      <option value="RR">Roraima</option>
-                      <option value="SC">Santa Catarina</option>
-                      <option value="SP">São Paulo</option>
-                      <option value="SE">Sergipe</option>
-                      <option value="TO">Tocantins</option>
-                    </select>
-                  </div>
-                </div> */}
-
-                <div className="mt-2">
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Endereço de email
+                    Complemento
                   </label>
                   <div className="mt-2">
                     <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
+                      id="complement"
+                      name="complement"
+                      type="text"
+                      autoComplete="complement"
                       required
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      onChange={setarEmail}
+                      onChange={setarComplemento}
                     />
                   </div>
                 </div>
-
-                <div className="mt-4">
+                <div className="mb-4">
                   <label
-                    htmlFor="password"
+                    htmlFor="reference"
                     className="block text-sm font-medium leading-6 text-gray-900"
                   >
-                    Senha
+                    Referência
                   </label>
                   <div className="mt-2">
                     <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="password"
+                      id="reference"
+                      name="reference"
+                      type="text"
+                      autoComplete="reference"
                       required
                       className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      onChange={setarPassword}
-                    />
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Confirme sua senha
-                  </label>
-                  <div className="mt-2">
-                    <input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type="password"
-                      autoComplete="confirmPassword"
-                      required
-                      className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      onChange={setarConfirmSenha}
+                      onChange={setarReferencia}
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div>
+            <div className="divForm2">
+              <h1 className="infoLogin">Informações de login</h1>
+              <div className="mt-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Endereço de email
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={setarEmail}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Senha
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="password"
+                    required
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={setarPassword}
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Confirme sua senha
+                </label>
+                <div className="mt-2">
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="confirmPassword"
+                    required
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    onChange={setarConfirmSenha}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="divBtnCadastrar">
               <button
                 type="submit"
-                className="globalButton flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="globalButton flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 btnCadastrar"
               >
-                {isLoading ? "Carregando.." : "Cadastrar"}
+                {!isLoading ? "Cadastrar" : loadingText}
               </button>
             </div>
           </form>
