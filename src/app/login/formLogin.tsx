@@ -1,5 +1,8 @@
+import "./formLogin.css";
+
 import { apiLogin } from "@/utils/apiUrl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 interface LoginFormProps {
   onSubmit: (formData: { token: string; id: number }) => void;
@@ -8,7 +11,8 @@ interface LoginFormProps {
 export default function FormLogin({ onSubmit }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("Carregando");
 
   const setarEmail = (e: any) => {
     if (e.target.value !== "") setEmail(e.target.value);
@@ -17,9 +21,33 @@ export default function FormLogin({ onSubmit }: LoginFormProps) {
     setPassword(e.target.value);
   };
 
+  const updateLoadingText = () => {
+    setLoadingText((prevText) => {
+      if (prevText === "Carregando...") {
+        return "Carregando";
+      } else {
+        return prevText + ".";
+      }
+    });
+  };
+
+  useEffect(() => {
+    let interval: any;
+
+    if (isLoading) {
+      interval = setInterval(updateLoadingText, 500);
+    } else {
+      setLoadingText("Carregando");
+    }
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isLoading]);
+
   const envioForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
+    setIsLoading(true);
 
     if (!email || !password) {
       console.error("DEU ERRADO!");
@@ -27,7 +55,7 @@ export default function FormLogin({ onSubmit }: LoginFormProps) {
     }
 
     try {
-      const response = await fetch(apiLogin.api_online, {
+      const response = await fetch(apiLogin.api_local, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,21 +65,19 @@ export default function FormLogin({ onSubmit }: LoginFormProps) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Login bem sucedido", data);
+        Swal.fire("Bom trabalho!", data.message, "success");
 
         onSubmit({ token: data.token, id: data.id });
       } else {
         if (response.status === 400) {
           const errorData = await response.json();
-          console.log(errorData);
+          const { message } = errorData;
+          Swal.fire("Erro ao logar!", message, "error");
+          setIsLoading(false);
         }
       }
     } catch (error) {
-      console.log("Erro ao enviar solicitação de login", error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 3000);
+      console.error(error);
     }
   };
 
@@ -87,7 +113,7 @@ export default function FormLogin({ onSubmit }: LoginFormProps) {
           </label>
           <div className="text-sm">
             <a
-              href="#"
+              href="/recuperarSenha"
               className="font-semibold text-indigo-600 hover:text-indigo-500"
             >
               Esqueceu sua senha?
@@ -112,7 +138,7 @@ export default function FormLogin({ onSubmit }: LoginFormProps) {
           type="submit"
           className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          {isLoading ? "Carregando.." : "Entrar"}
+          {!isLoading ? "Entrar" : loadingText}
         </button>
       </div>
     </form>

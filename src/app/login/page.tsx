@@ -12,12 +12,14 @@ export default function Login() {
   const handleLoginSubmit = (formData: { token: string; id: number }) => {
     sessionStorage.setItem("secretToken", formData.token);
     sessionStorage.setItem("id", formData.id.toString());
-    router.push("/perfil");
+    // router.push("/perfil");
+    setIsAuthenticated(true);
   };
 
   useEffect(() => {
     if (sessionStorage.getItem("secretToken")) {
-      router.push("/perfil"); // Redirecionar para a página de perfil
+      // router.push("/perfil");
+      setIsAuthenticated(true);
     }
   }, []);
 
